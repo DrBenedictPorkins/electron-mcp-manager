@@ -1,0 +1,63 @@
+{
+  "id": "approval_1755698511443_ji3zmgshj",
+  "title": "Requirements Phase: mcp-server-manager - Ready for Review",
+  "filePath": ".spec-workflow/specs/mcp-server-manager/requirements.md",
+  "type": "document",
+  "status": "needs-revision",
+  "createdAt": "2025-08-20T14:01:51.443Z",
+  "category": "spec",
+  "categoryName": "mcp-server-manager",
+  "response": "Feedback Summary (4 comments):\n\nSpecific Text Comments:\n1. \"4. IF server environment variables contain sensiti...\": IRRELEVANT in a single-user-use application\n2. \"terminal-style interface\": do not mention specific styles - just basic FUNCTIONAL UI implementation\n3. \"a monospace font with a dark terminal-style color ...\": do not mention specific styles - just basic FUNCTIONAL UI implementation\n4. \"### Performance\n\n- Application startup time should...\": irrelevant - defaults are acceptable.\n",
+  "annotations": "{\n  \"decision\": \"needs-revision\",\n  \"comments\": [\n    {\n      \"type\": \"selection\",\n      \"comment\": \"IRRELEVANT in a single-user-use application\",\n      \"timestamp\": \"2025-08-20T14:06:06.043Z\",\n      \"selectedText\": \"4. IF server environment variables contain sensitive data THEN the application SHALL mask values containing \\\"key\\\", \\\"token\\\", \\\"secret\\\", \\\"password\\\", or \\\"auth\\\" patterns\",\n      \"highlightColor\": {\n        \"bg\": \"rgba(255, 235, 59, 0.3)\",\n        \"border\": \"#FFEB3B\",\n        \"name\": \"#ffeb3b\"\n      },\n      \"id\": \"comment_1755698766043_yn6fywerr\"\n    },\n    {\n      \"type\": \"selection\",\n      \"comment\": \"do not mention specific styles - just basic FUNCTIONAL UI implementation\",\n      \"timestamp\": \"2025-08-20T14:07:18.815Z\",\n      \"selectedText\": \"terminal-style interface\",\n      \"highlightColor\": {\n        \"bg\": \"rgba(255, 235, 59, 0.3)\",\n        \"border\": \"#FFEB3B\",\n        \"name\": \"#ffeb3b\"\n      },\n      \"id\": \"comment_1755698838815_jltgmhr23\"\n    },\n    {\n      \"type\": \"selection\",\n      \"comment\": \"do not mention specific styles - just basic FUNCTIONAL UI implementation\",\n      \"timestamp\": \"2025-08-20T14:07:58.905Z\",\n      \"selectedText\": \"a monospace font with a dark terminal-style color scheme (black background, green text)\",\n      \"highlightColor\": {\n        \"bg\": \"rgba(255, 235, 59, 0.3)\",\n        \"border\": \"#FFEB3B\",\n        \"name\": \"#ffeb3b\"\n      },\n      \"id\": \"comment_1755698878905_r21pndsc1\"\n    },\n    {\n      \"type\": \"selection\",\n      \"comment\": \"irrelevant - defaults are acceptable.\",\n      \"timestamp\": \"2025-08-20T14:09:25.086Z\",\n      \"selectedText\": \"### Performance\\n\\n- Application startup time should be under 2 seconds on modern macOS systems\\n- Configuration file reads/writes should complete within 500ms for typical file sizes\\n- UI refresh operations should complete within 100ms to maintain responsive user experience\\n- Memory usage should remain under 100MB during normal operation\",\n      \"highlightColor\": {\n        \"bg\": \"rgba(255, 235, 59, 0.3)\",\n        \"border\": \"#FFEB3B\",\n        \"name\": \"#ffeb3b\"\n      },\n      \"id\": \"comment_1755698965086_n417cb3jy\"\n    }\n  ],\n  \"summary\": \"Feedback Summary (4 comments):\\n\\nSpecific Text Comments:\\n1. \\\"4. IF server environment variables contain sensiti...\\\": IRRELEVANT in a single-user-use application\\n2. \\\"terminal-style interface\\\": do not mention specific styles - just basic FUNCTIONAL UI implementation\\n3. \\\"a monospace font with a dark terminal-style color ...\\\": do not mention specific styles - just basic FUNCTIONAL UI implementation\\n4. \\\"### Performance\\n\\n- Application startup time should...\\\": irrelevant - defaults are acceptable.\\n\",\n  \"timestamp\": \"2025-08-20T14:09:56.402Z\"\n}",
+  "respondedAt": "2025-08-20T14:09:56.410Z",
+  "comments": [
+    {
+      "type": "selection",
+      "comment": "IRRELEVANT in a single-user-use application",
+      "timestamp": "2025-08-20T14:06:06.043Z",
+      "selectedText": "4. IF server environment variables contain sensitive data THEN the application SHALL mask values containing \"key\", \"token\", \"secret\", \"password\", or \"auth\" patterns",
+      "highlightColor": {
+        "bg": "rgba(255, 235, 59, 0.3)",
+        "border": "#FFEB3B",
+        "name": "#ffeb3b"
+      },
+      "id": "comment_1755698766043_yn6fywerr"
+    },
+    {
+      "type": "selection",
+      "comment": "do not mention specific styles - just basic FUNCTIONAL UI implementation",
+      "timestamp": "2025-08-20T14:07:18.815Z",
+      "selectedText": "terminal-style interface",
+      "highlightColor": {
+        "bg": "rgba(255, 235, 59, 0.3)",
+        "border": "#FFEB3B",
+        "name": "#ffeb3b"
+      },
+      "id": "comment_1755698838815_jltgmhr23"
+    },
+    {
+      "type": "selection",
+      "comment": "do not mention specific styles - just basic FUNCTIONAL UI implementation",
+      "timestamp": "2025-08-20T14:07:58.905Z",
+      "selectedText": "a monospace font with a dark terminal-style color scheme (black background, green text)",
+      "highlightColor": {
+        "bg": "rgba(255, 235, 59, 0.3)",
+        "border": "#FFEB3B",
+        "name": "#ffeb3b"
+      },
+      "id": "comment_1755698878905_r21pndsc1"
+    },
+    {
+      "type": "selection",
+      "comment": "irrelevant - defaults are acceptable.",
+      "timestamp": "2025-08-20T14:09:25.086Z",
+      "selectedText": "### Performance\n\n- Application startup time should be under 2 seconds on modern macOS systems\n- Configuration file reads/writes should complete within 500ms for typical file sizes\n- UI refresh operations should complete within 100ms to maintain responsive user experience\n- Memory usage should remain under 100MB during normal operation",
+      "highlightColor": {
+        "bg": "rgba(255, 235, 59, 0.3)",
+        "border": "#FFEB3B",
+        "name": "#ffeb3b"
+      },
+      "id": "comment_1755698965086_n417cb3jy"
+    }
+  ]
+}

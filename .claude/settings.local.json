@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/makram/dev/mcp/mcp-manager/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

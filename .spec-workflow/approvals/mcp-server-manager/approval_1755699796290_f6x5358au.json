@@ -1,0 +1,21 @@
+{
+  "id": "approval_1755699796290_f6x5358au",
+  "title": "Design Phase: mcp-server-manager - Revised Without UI Styling",
+  "filePath": ".spec-workflow/specs/mcp-server-manager/design.md",
+  "type": "document",
+  "status": "needs-revision",
+  "createdAt": "2025-08-20T14:23:16.290Z",
+  "category": "spec",
+  "categoryName": "mcp-server-manager",
+  "response": "Feedback Summary (1 comments):\n\nGeneral Comments:\n1. Remove all references to TESTING and TESTING STRATEGIES\n\n",
+  "annotations": "{\n  \"decision\": \"needs-revision\",\n  \"comments\": [\n    {\n      \"type\": \"general\",\n      \"comment\": \"Remove all references to TESTING and TESTING STRATEGIES\",\n      \"timestamp\": \"2025-08-20T14:24:21.144Z\",\n      \"id\": \"comment_1755699861144_za6dibxwn\"\n    }\n  ],\n  \"summary\": \"Feedback Summary (1 comments):\\n\\nGeneral Comments:\\n1. Remove all references to TESTING and TESTING STRATEGIES\\n\\n\",\n  \"timestamp\": \"2025-08-20T14:24:22.278Z\"\n}",
+  "respondedAt": "2025-08-20T14:24:22.283Z",
+  "comments": [
+    {
+      "type": "general",
+      "comment": "Remove all references to TESTING and TESTING STRATEGIES",
+      "timestamp": "2025-08-20T14:24:21.144Z",
+      "id": "comment_1755699861144_za6dibxwn"
+    }
+  ]
+}
