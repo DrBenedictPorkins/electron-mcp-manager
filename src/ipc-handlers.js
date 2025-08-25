@@ -69,10 +69,12 @@ class IPCHandlers {
           return { success: true, data: [] };
         }
         
-        const projects = Object.keys(config.projects).map(projectPath => ({
-          path: projectPath,
-          name: require('path').basename(projectPath)
-        }));
+        const projects = Object.keys(config.projects)
+          .filter(projectPath => projectPath !== '/')
+          .map(projectPath => ({
+            path: projectPath,
+            name: require('path').basename(projectPath)
+          }));
         
         return { success: true, data: projects };
       } catch (error) {

@@ -56,47 +56,70 @@ class MCPManager {
   }
 
   renderAll() {
-    this.renderInfoCard();
     this.renderServers();
   }
 
-  async renderInfoCard() {
-    const currentServers = this.servers.filter(s => s.appType === this.currentTab);
-    const active = currentServers.filter(s => s.enabled).length;
-    const disabled = currentServers.filter(s => !s.enabled).length;
-    const global = currentServers.filter(s => s.scope === 'global').length;
-    const project = currentServers.filter(s => s.scope === 'project').length;
-
+  async getConfigInfo() {
     try {
       const result = await electronAPI.getConfigInfo(this.currentTab);
-      
       if (result.success) {
-        const { path, exists } = result.data;
-        document.getElementById('stats-container').innerHTML = `
-          <div class="info-card">
-            <div class="stats-compact">
-              <span>Total: ${currentServers.length}</span>
-              <span>Active: <strong class="enabled">${active}</strong></span>
-              <span>Disabled: <strong class="disabled">${disabled}</strong></span>
-              <span>Global: ${global}</span>
-              <span>Project: ${project}</span>
-            </div>
-            <div class="config-compact">
-              <code class="config-path">${path}</code>
-              <span class="config-status ${exists ? 'exists' : 'missing'}">${exists ? 'EXISTS' : 'MISSING'}</span>
-              <button class="btn-small" onclick="mcpManager.openConfigFile()">Open</button>
-            </div>
-          </div>
-        `;
+        return result.data;
       }
     } catch (error) {
       console.error('Error loading config info:', error);
     }
+    return null;
   }
 
-  renderServers() {
+  renderGlobalStatsCard(globalServers, configInfo) {
+    const active = globalServers.filter(s => s.enabled).length;
+    const disabled = globalServers.filter(s => !s.enabled).length;
+    
+    let configSection = '';
+    if (configInfo) {
+      const { path, exists } = configInfo;
+      configSection = `
+        <div class="config-compact">
+          <code class="config-path">${path}</code>
+          <span class="config-status ${exists ? 'exists' : 'missing'}">${exists ? 'EXISTS' : 'MISSING'}</span>
+          <button class="btn-small" onclick="mcpManager.openConfigFile()">Open</button>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="info-card">
+        <div class="stats-compact">
+          <span>Total: ${globalServers.length}</span>
+          <span>Active: <strong class="enabled">${active}</strong></span>
+          <span>Disabled: <strong class="disabled">${disabled}</strong></span>
+        </div>
+        ${configSection}
+      </div>
+    `;
+  }
+
+  renderProjectStatsCard(projectServers) {
+    const active = projectServers.filter(s => s.enabled).length;
+    const disabled = projectServers.filter(s => !s.enabled).length;
+
+    return `
+      <div class="info-card">
+        <div class="stats-compact">
+          <span>Total: ${projectServers.length}</span>
+          <span>Active: <strong class="enabled">${active}</strong></span>
+          <span>Disabled: <strong class="disabled">${disabled}</strong></span>
+        </div>
+      </div>
+    `;
+  }
+
+  async renderServers() {
     const currentServers = this.servers.filter(s => s.appType === this.currentTab);
     const container = document.getElementById('servers-container');
+    
+    // Clear the stats container since we'll be showing stats within sections
+    document.getElementById('stats-container').innerHTML = '';
     
     if (currentServers.length === 0) {
       container.innerHTML = '<div class="no-servers">No servers found</div>';
@@ -105,11 +128,15 @@ class MCPManager {
 
     const globalServers = currentServers.filter(s => s.scope === 'global');
     const projectServers = currentServers.filter(s => s.scope === 'project');
+    
+    // Get config info for global section
+    const configInfo = await this.getConfigInfo();
 
     let html = '';
 
     if (globalServers.length > 0) {
       html += '<div class="server-group-title">Global</div>';
+      html += this.renderGlobalStatsCard(globalServers, configInfo);
       html += globalServers.map(server => `
         <div class="server-card ${server.enabled ? 'enabled' : 'disabled'} ${server.scope}">
           <div class="server-header">
@@ -143,6 +170,7 @@ class MCPManager {
         html += '<div class="server-separator"></div>';
       }
       html += '<div class="server-group-title">Project</div>';
+      html += this.renderProjectStatsCard(projectServers);
       html += projectServers.map(server => `
         <div class="server-card ${server.enabled ? 'enabled' : 'disabled'} ${server.scope}">
           <div class="server-header">
@@ -247,18 +275,43 @@ class MCPManager {
       
       dropdown.style.position = 'absolute';
       dropdown.style.top = `${rect.bottom + scrollTop + 5}px`;
-      dropdown.style.left = `${rect.right - 200}px`; // Right align with 200px width
+      dropdown.style.left = `${rect.right - 350}px`; // Right align with dropdown width
       
       // Adjust if going off screen
-      if (dropdown.style.left < '10px') {
-        dropdown.style.left = '10px';
+      const minLeft = 10;
+      const maxRight = window.innerWidth - 10;
+      let leftPos = parseInt(dropdown.style.left);
+      
+      if (leftPos < minLeft) {
+        dropdown.style.left = `${minLeft}px`;
+      } else if (leftPos + 350 > maxRight) {
+        dropdown.style.left = `${maxRight - 350}px`;
       }
       
       document.body.appendChild(dropdown);
       
-      // Close on outside click
+      // Close on outside click, but not when clicking inside dropdown
       setTimeout(() => {
-        document.addEventListener('click', this.closeProjectDropdown.bind(this), { once: true });
+        const closeHandler = (e) => {
+          if (!dropdown.contains(e.target)) {
+            this.closeProjectDropdown();
+          }
+        };
+        document.addEventListener('click', closeHandler, { once: true });
+        
+        // Re-attach handler if dropdown still exists after click
+        dropdown.addEventListener('click', (e) => {
+          // Only re-attach if we clicked on something that doesn't close the dropdown
+          if (!e.target.classList.contains('dropdown-item') || 
+              e.target.id === 'project-search-input' ||
+              e.target.closest('.dropdown-search')) {
+            setTimeout(() => {
+              if (document.getElementById('project-dropdown')) {
+                document.addEventListener('click', closeHandler, { once: true });
+              }
+            }, 0);
+          }
+        });
       }, 0);
       
     } catch (error) {
@@ -273,15 +326,37 @@ class MCPManager {
     
     let html = '';
     
+    // Determine total available projects for search threshold
+    let totalProjects = 0;
+    if (currentScope === 'global') {
+      totalProjects = projects.length;
+    } else {
+      // For project servers: other projects (excluding current)
+      totalProjects = projects.filter(p => p.path !== currentProject).length;
+    }
+    
+    // Add search input if more than 6 projects
+    const showSearch = totalProjects > 6;
+    if (showSearch) {
+      html += `
+        <div class="dropdown-search">
+          <input type="text" id="project-search-input" placeholder="Search projects..." autocomplete="off">
+        </div>
+      `;
+    }
+    
+    // Start dropdown items container
+    html += '<div class="dropdown-items">';
+    
     if (currentScope === 'global') {
       // Global server - can move to any project
       if (projects.length === 0) {
-        html = '<div class="dropdown-item">No projects found</div>';
+        html += '<div class="dropdown-item">No projects found</div>';
       } else {
         projects.forEach(project => {
           html += `
-            <div class="dropdown-item" onclick="mcpManager.moveToProject('${serverName}', '${project.path}')">
-              <div class="project-name">${project.name}</div>
+            <div class="dropdown-item" data-project-name="${project.name.toLowerCase()}" onclick="mcpManager.moveToProject('${serverName}', '${project.path}')">
+              <div class="project-name">Copy to ${project.name}</div>
               <div class="project-path">${project.path}</div>
             </div>
           `;
@@ -300,7 +375,7 @@ class MCPManager {
         html += '<div class="dropdown-separator"></div>';
         otherProjects.forEach(project => {
           html += `
-            <div class="dropdown-item copy" onclick="mcpManager.copyToProject('${serverName}', '${currentProject}', '${project.path}')">
+            <div class="dropdown-item copy" data-project-name="${project.name.toLowerCase()}" onclick="mcpManager.copyToProject('${serverName}', '${currentProject}', '${project.path}')">
               <div class="project-name">Copy to ${project.name}</div>
               <div class="project-path">${project.path}</div>
             </div>
@@ -309,8 +384,96 @@ class MCPManager {
       }
     }
     
+    // Close dropdown items container
+    html += '</div>';
+    
     dropdown.innerHTML = html;
+    
+    // Set up search functionality if search input exists
+    if (showSearch) {
+      this.setupDropdownSearch(dropdown);
+    }
+    
     return dropdown;
+  }
+
+  setupDropdownSearch(dropdown) {
+    // Use setTimeout to ensure the dropdown is added to DOM
+    setTimeout(() => {
+      const searchInput = dropdown.querySelector('#project-search-input');
+      const dropdownItems = dropdown.querySelector('.dropdown-items');
+      
+      if (!searchInput || !dropdownItems) return;
+      
+      // Focus the search input
+      searchInput.focus();
+      
+      // Prevent dropdown from closing when clicking on search input
+      searchInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+      
+      // Handle search input
+      searchInput.addEventListener('input', (e) => {
+        this.filterDropdownItems(e.target.value.toLowerCase(), dropdownItems);
+      });
+      
+      // Prevent dropdown from closing when typing
+      searchInput.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+      });
+      
+    }, 0);
+  }
+  
+  filterDropdownItems(searchTerm, dropdownItems) {
+    const items = dropdownItems.querySelectorAll('.dropdown-item');
+    let visibleCount = 0;
+    
+    items.forEach(item => {
+      // Skip separators and non-project items (like "Move to Global")
+      if (item.classList.contains('move') || item.classList.contains('dropdown-separator')) {
+        // Always show these items
+        item.style.display = '';
+        return;
+      }
+      
+      // For project items, check if they have the data attribute
+      const projectName = item.getAttribute('data-project-name');
+      if (projectName) {
+        const isVisible = searchTerm === '' || projectName.includes(searchTerm);
+        item.style.display = isVisible ? '' : 'none';
+        if (isVisible) visibleCount++;
+      } else {
+        // For items without project name (like "No projects found")
+        item.style.display = '';
+      }
+    });
+    
+    // Update dropdown height dynamically based on visible items
+    this.updateDropdownHeight(dropdownItems, visibleCount);
+  }
+  
+  updateDropdownHeight(dropdownItems, visibleCount) {
+    // Calculate approximate height based on visible items
+    // Each item is roughly 60px (padding + content), plus separators
+    const baseHeight = 60; // Base height for non-project items
+    const itemHeight = 60; // Height per project item
+    const maxHeight = 300; // Max height from CSS
+    
+    let estimatedHeight = baseHeight + (visibleCount * itemHeight);
+    
+    // Cap at max height to maintain scroll
+    if (estimatedHeight > maxHeight) {
+      estimatedHeight = maxHeight;
+    }
+    
+    // Set minimum height for better UX
+    if (estimatedHeight < 100 && visibleCount > 0) {
+      estimatedHeight = 100;
+    }
+    
+    dropdownItems.style.maxHeight = `${estimatedHeight}px`;
   }
 
   closeProjectDropdown() {
