@@ -1,0 +1,20 @@
+// Test IPC communication by running the electron app
+console.log('=== Phase 4 Test ===');
+console.log('To test Phase 4:');
+console.log('1. Run: npm run dev');
+console.log('2. Open DevTools in the Electron app');
+console.log('3. Test these commands in the console:');
+console.log('');
+console.log('// Test getting all servers');
+console.log('electronAPI.getAllServers().then(console.log)');
+console.log('');
+console.log('// Test getting config info');
+console.log('electronAPI.getConfigInfo("claude-code").then(console.log)');
+console.log('electronAPI.getConfigInfo("claude-desktop").then(console.log)');
+console.log('');
+console.log('// Test system info');
+console.log('console.log("Electron version:", electronAPI.getVersion())');
+console.log('console.log("Platform:", electronAPI.getPlatform())');
+console.log('');
+console.log('All methods should return success/error objects without throwing errors.');
+console.log('Phase 4 is complete when all IPC methods work correctly.');
