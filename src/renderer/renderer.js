@@ -116,7 +116,8 @@ class MCPManager {
             <div class="server-info">
               <div class="server-name-row">
                 <h3 class="server-name">${server.name}</h3>
-                <span class="server-scope ${server.scope}">${server.scope === 'global' ? 'global' : `project: ${server.projectPath}`}</span>
+                <span class="server-scope ${server.scope} ${!server.enabled ? 'disabled' : ''}" 
+                    ${server.enabled ? `onclick="mcpManager.showProjectDropdown(event, '${server.name}', '${server.scope}', ${server.projectPath ? `'${server.projectPath}'` : 'null'})"` : ''}>${server.scope === 'global' ? 'global' : `project: ${server.projectPath}`}</span>
               </div>
             </div>
             <div class="server-controls">
@@ -148,7 +149,8 @@ class MCPManager {
             <div class="server-info">
               <div class="server-name-row">
                 <h3 class="server-name">${server.name}</h3>
-                <span class="server-scope ${server.scope}">${server.scope === 'global' ? 'global' : `project: ${server.projectPath}`}</span>
+                <span class="server-scope ${server.scope} ${!server.enabled ? 'disabled' : ''}" 
+                    ${server.enabled ? `onclick="mcpManager.showProjectDropdown(event, '${server.name}', '${server.scope}', ${server.projectPath ? `'${server.projectPath}'` : 'null'})"` : ''}>${server.scope === 'global' ? 'global' : `project: ${server.projectPath}`}</span>
               </div>
             </div>
             <div class="server-controls">
@@ -214,6 +216,150 @@ class MCPManager {
 
   hideError() {
     document.getElementById('error').classList.add('hidden');
+  }
+
+  async showProjectDropdown(event, serverName, currentScope, currentProject) {
+    event.stopPropagation();
+    
+    // Close any existing dropdown
+    this.closeProjectDropdown();
+    
+    try {
+      // Only works for Claude Code
+      if (this.currentTab !== 'claude-code') {
+        this.showError('Project operations only available for Claude Code');
+        return;
+      }
+
+      const projectsResult = await electronAPI.getProjectsList();
+      if (!projectsResult.success) {
+        this.showError(`Failed to load projects: ${projectsResult.error}`);
+        return;
+      }
+      
+      const projects = projectsResult.data;
+      const dropdown = this.createProjectDropdown(serverName, currentScope, currentProject, projects);
+      
+      // Position dropdown
+      const scopeElement = event.target;
+      const rect = scopeElement.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      dropdown.style.position = 'absolute';
+      dropdown.style.top = `${rect.bottom + scrollTop + 5}px`;
+      dropdown.style.left = `${rect.right - 200}px`; // Right align with 200px width
+      
+      // Adjust if going off screen
+      if (dropdown.style.left < '10px') {
+        dropdown.style.left = '10px';
+      }
+      
+      document.body.appendChild(dropdown);
+      
+      // Close on outside click
+      setTimeout(() => {
+        document.addEventListener('click', this.closeProjectDropdown.bind(this), { once: true });
+      }, 0);
+      
+    } catch (error) {
+      this.showError(`Error showing project dropdown: ${error.message}`);
+    }
+  }
+
+  createProjectDropdown(serverName, currentScope, currentProject, projects) {
+    const dropdown = document.createElement('div');
+    dropdown.className = 'project-dropdown';
+    dropdown.id = 'project-dropdown';
+    
+    let html = '';
+    
+    if (currentScope === 'global') {
+      // Global server - can move to any project
+      if (projects.length === 0) {
+        html = '<div class="dropdown-item">No projects found</div>';
+      } else {
+        projects.forEach(project => {
+          html += `
+            <div class="dropdown-item" onclick="mcpManager.moveToProject('${serverName}', '${project.path}')">
+              <div class="project-name">${project.name}</div>
+              <div class="project-path">${project.path}</div>
+            </div>
+          `;
+        });
+      }
+    } else {
+      // Project server - can move to global or copy to other projects
+      html += `
+        <div class="dropdown-item move" onclick="mcpManager.moveToGlobal('${serverName}', '${currentProject}')">
+          Move to Global
+        </div>
+      `;
+      
+      const otherProjects = projects.filter(p => p.path !== currentProject);
+      if (otherProjects.length > 0) {
+        html += '<div class="dropdown-separator"></div>';
+        otherProjects.forEach(project => {
+          html += `
+            <div class="dropdown-item copy" onclick="mcpManager.copyToProject('${serverName}', '${currentProject}', '${project.path}')">
+              <div class="project-name">Copy to ${project.name}</div>
+              <div class="project-path">${project.path}</div>
+            </div>
+          `;
+        });
+      }
+    }
+    
+    dropdown.innerHTML = html;
+    return dropdown;
+  }
+
+  closeProjectDropdown() {
+    const dropdown = document.getElementById('project-dropdown');
+    if (dropdown) {
+      dropdown.remove();
+    }
+  }
+
+  async moveToProject(serverName, projectPath) {
+    this.closeProjectDropdown();
+    try {
+      const result = await electronAPI.moveServer(serverName, 'global', null, 'project', projectPath);
+      if (result.success) {
+        await this.loadData(); // Refresh entire list
+      } else {
+        this.showError(`Failed to move server: ${result.error}`);
+      }
+    } catch (error) {
+      this.showError(`Error moving server: ${error.message}`);
+    }
+  }
+
+  async moveToGlobal(serverName, fromProject) {
+    this.closeProjectDropdown();
+    try {
+      const result = await electronAPI.moveServer(serverName, 'project', fromProject, 'global', null);
+      if (result.success) {
+        await this.loadData(); // Refresh entire list
+      } else {
+        this.showError(`Failed to move server: ${result.error}`);
+      }
+    } catch (error) {
+      this.showError(`Error moving server: ${error.message}`);
+    }
+  }
+
+  async copyToProject(serverName, fromProject, toProject) {
+    this.closeProjectDropdown();
+    try {
+      const result = await electronAPI.copyServer(serverName, fromProject, toProject);
+      if (result.success) {
+        await this.loadData(); // Refresh entire list
+      } else {
+        this.showError(`Failed to copy server: ${result.error}`);
+      }
+    } catch (error) {
+      this.showError(`Error copying server: ${error.message}`);
+    }
   }
 }
 

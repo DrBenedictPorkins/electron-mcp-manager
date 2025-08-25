@@ -59,6 +59,54 @@ class IPCHandlers {
         return { success: false, error: error.message };
       }
     });
+
+    ipcMain.handle('get-projects-list', async () => {
+      try {
+        const configPath = this.serverManager.configMgr.getConfigPath('claude-code');
+        const config = await this.serverManager.fileOps.loadJSONFile(configPath);
+        
+        if (!config || !config.projects) {
+          return { success: true, data: [] };
+        }
+        
+        const projects = Object.keys(config.projects).map(projectPath => ({
+          path: projectPath,
+          name: require('path').basename(projectPath)
+        }));
+        
+        return { success: true, data: projects };
+      } catch (error) {
+        console.error('get-projects-list error:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('move-server', async (event, serverName, fromScope, fromProject, toScope, toProject) => {
+      try {
+        if (fromScope === 'global' && toScope === 'project') {
+          // Move from global to project
+          await this.serverManager.moveGlobalToProject(serverName, toProject);
+        } else if (fromScope === 'project' && toScope === 'global') {
+          // Move from project to global
+          await this.serverManager.moveProjectToGlobal(serverName, fromProject);
+        }
+        return { success: true };
+      } catch (error) {
+        console.error('move-server error:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('copy-server', async (event, serverName, fromProject, toProject) => {
+      try {
+        // Copy from one project to another
+        await this.serverManager.copyProjectToProject(serverName, fromProject, toProject);
+        return { success: true };
+      } catch (error) {
+        console.error('copy-server error:', error);
+        return { success: false, error: error.message };
+      }
+    });
   }
 }
 

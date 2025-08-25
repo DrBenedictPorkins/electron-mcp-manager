@@ -10,6 +10,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openConfigFile: (appType) => ipcRenderer.invoke('open-config-file', appType),
   getConfigInfo: (appType) => ipcRenderer.invoke('get-config-info', appType),
   
+  // Project operations
+  getProjectsList: () => ipcRenderer.invoke('get-projects-list'),
+  moveServer: (serverName, fromScope, fromProject, toScope, toProject) =>
+    ipcRenderer.invoke('move-server', serverName, fromScope, fromProject, toScope, toProject),
+  copyServer: (serverName, fromProject, toProject) =>
+    ipcRenderer.invoke('copy-server', serverName, fromProject, toProject),
+  
   // System info
   getVersion: () => process.versions.electron,
   getPlatform: () => process.platform

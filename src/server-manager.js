@@ -199,6 +199,119 @@ class ServerManager {
       throw error;
     }
   }
+
+  async moveGlobalToProject(serverName, projectPath) {
+    const configPath = this.configMgr.getConfigPath('claude-code');
+    let config = await this.fileOps.loadJSONFile(configPath);
+    
+    if (!config || !config.mcpServers || !config.mcpServers[serverName]) {
+      throw new Error(`Global server not found: ${serverName}`);
+    }
+
+    const serverConfig = config.mcpServers[serverName];
+    const originalConfig = JSON.parse(JSON.stringify(config));
+
+    try {
+      // Remove from global
+      delete config.mcpServers[serverName];
+
+      // Add to project
+      if (!config.projects) config.projects = {};
+      if (!config.projects[projectPath]) {
+        config.projects[projectPath] = { mcpServers: {} };
+      }
+      if (!config.projects[projectPath].mcpServers) {
+        config.projects[projectPath].mcpServers = {};
+      }
+      config.projects[projectPath].mcpServers[serverName] = serverConfig;
+
+      await this.fileOps.saveJSONFile(configPath, config);
+    } catch (error) {
+      // Rollback
+      try {
+        await this.fileOps.saveJSONFile(configPath, originalConfig);
+      } catch (rollbackError) {
+        console.error('Rollback failed:', rollbackError.message);
+      }
+      throw error;
+    }
+  }
+
+  async moveProjectToGlobal(serverName, fromProjectPath) {
+    const configPath = this.configMgr.getConfigPath('claude-code');
+    let config = await this.fileOps.loadJSONFile(configPath);
+    
+    if (!config || !config.projects || !config.projects[fromProjectPath] || 
+        !config.projects[fromProjectPath].mcpServers || 
+        !config.projects[fromProjectPath].mcpServers[serverName]) {
+      throw new Error(`Project server not found: ${serverName} in ${fromProjectPath}`);
+    }
+
+    const serverConfig = config.projects[fromProjectPath].mcpServers[serverName];
+    const originalConfig = JSON.parse(JSON.stringify(config));
+
+    try {
+      // Remove from project
+      delete config.projects[fromProjectPath].mcpServers[serverName];
+
+      // Clean up empty structures
+      if (Object.keys(config.projects[fromProjectPath].mcpServers).length === 0) {
+        delete config.projects[fromProjectPath];
+      }
+      if (Object.keys(config.projects).length === 0) {
+        delete config.projects;
+      }
+
+      // Add to global
+      if (!config.mcpServers) config.mcpServers = {};
+      config.mcpServers[serverName] = serverConfig;
+
+      await this.fileOps.saveJSONFile(configPath, config);
+    } catch (error) {
+      // Rollback
+      try {
+        await this.fileOps.saveJSONFile(configPath, originalConfig);
+      } catch (rollbackError) {
+        console.error('Rollback failed:', rollbackError.message);
+      }
+      throw error;
+    }
+  }
+
+  async copyProjectToProject(serverName, fromProjectPath, toProjectPath) {
+    const configPath = this.configMgr.getConfigPath('claude-code');
+    let config = await this.fileOps.loadJSONFile(configPath);
+    
+    if (!config || !config.projects || !config.projects[fromProjectPath] || 
+        !config.projects[fromProjectPath].mcpServers || 
+        !config.projects[fromProjectPath].mcpServers[serverName]) {
+      throw new Error(`Source project server not found: ${serverName} in ${fromProjectPath}`);
+    }
+
+    const serverConfig = config.projects[fromProjectPath].mcpServers[serverName];
+    const originalConfig = JSON.parse(JSON.stringify(config));
+
+    try {
+      // Add to destination project
+      if (!config.projects[toProjectPath]) {
+        config.projects[toProjectPath] = { mcpServers: {} };
+      }
+      if (!config.projects[toProjectPath].mcpServers) {
+        config.projects[toProjectPath].mcpServers = {};
+      }
+      config.projects[toProjectPath].mcpServers[serverName] = serverConfig;
+
+      await this.fileOps.saveJSONFile(configPath, config);
+    } catch (error) {
+      // Rollback
+      try {
+        await this.fileOps.saveJSONFile(configPath, originalConfig);
+      } catch (rollbackError) {
+        console.error('Rollback failed:', rollbackError.message);
+      }
+      throw error;
+    }
+  }
 }
 
 module.exports = ServerManager;
