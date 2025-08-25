@@ -165,3 +165,6 @@ junit.xml
 *.crt
 *.key
 *.pem
+
+# Claude Code local configuration
+CLAUDE.local.md
