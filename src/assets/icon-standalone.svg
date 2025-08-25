@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient definitions using Claude's color palette -->
+    <radialGradient id="bgGradient" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#F4F3EE;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F4F3EE;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="serverGradient" cx="40%" cy="30%" r="60%">
+      <stop offset="0%" style="stop-color:#E67B4A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#C15F3C;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="centralGradient" cx="40%" cy="30%" r="60%">
+      <stop offset="0%" style="stop-color:#D46B3D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A54F32;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Drop shadow filter -->
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with rounded app icon style -->
+  <circle cx="512" cy="512" r="480" fill="url(#bgGradient)" stroke="none"/>
+  
+  <!-- Central management hub (slightly larger for standalone version) -->
+  <circle cx="512" cy="512" r="65" fill="url(#centralGradient)" filter="url(#dropShadow)"/>
+  <circle cx="512" cy="512" r="48" fill="none" stroke="#F4F3EE" stroke-width="3" opacity="0.8"/>
+  
+  <!-- Server nodes arranged in a circle (8 servers, slightly larger) -->
+  <!-- Top server -->
+  <circle cx="512" cy="275" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="496" y="264" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="498" y="267" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="498" y="272" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="498" y="277" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Top-right server -->
+  <circle cx="680" cy="344" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="664" y="333" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="666" y="336" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="666" y="341" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="666" y="346" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Right server -->
+  <circle cx="749" cy="512" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="733" y="501" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="735" y="504" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="735" y="509" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="735" y="514" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Bottom-right server -->
+  <circle cx="680" cy="680" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="664" y="669" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="666" y="672" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="666" y="677" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="666" y="682" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Bottom server -->
+  <circle cx="512" cy="749" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="496" y="738" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="498" y="741" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="498" y="746" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="498" y="751" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Bottom-left server -->
+  <circle cx="344" cy="680" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="328" y="669" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="330" y="672" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="330" y="677" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="330" y="682" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Left server -->
+  <circle cx="275" cy="512" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="259" y="501" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="261" y="504" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="261" y="509" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="261" y="514" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Top-left server -->
+  <circle cx="344" cy="344" r="45" fill="url(#serverGradient)" filter="url(#dropShadow)"/>
+  <rect x="328" y="333" width="32" height="22" rx="2" fill="#F4F3EE" opacity="0.9"/>
+  <rect x="330" y="336" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="330" y="341" width="28" height="3" rx="1" fill="#C15F3C"/>
+  <rect x="330" y="346" width="28" height="3" rx="1" fill="#C15F3C"/>
+  
+  <!-- Connection lines from center to each server -->
+  <g stroke="#C15F3C" stroke-width="4" stroke-opacity="0.6" fill="none" stroke-linecap="round">
+    <line x1="512" y1="447" x2="512" y2="320"/>  <!-- Top -->
+    <line x1="558" y1="458" x2="635" y2="389"/>  <!-- Top-right -->
+    <line x1="577" y1="512" x2="704" y2="512"/>  <!-- Right -->
+    <line x1="558" y1="566" x2="635" y2="635"/>  <!-- Bottom-right -->
+    <line x1="512" y1="577" x2="512" y2="704"/>  <!-- Bottom -->
+    <line x1="466" y1="566" x2="389" y2="635"/>  <!-- Bottom-left -->
+    <line x1="447" y1="512" x2="320" y2="512"/>  <!-- Left -->
+    <line x1="466" y1="458" x2="389" y2="389"/>  <!-- Top-left -->
+  </g>
+  
+  <!-- Central management indicator -->
+  <circle cx="512" cy="512" r="28" fill="none" stroke="#F4F3EE" stroke-width="2" opacity="0.9"/>
+  <circle cx="512" cy="512" r="10" fill="#F4F3EE" opacity="0.95"/>
+</svg>
