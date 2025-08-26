@@ -2,6 +2,10 @@ class MCPManager {
   constructor() {
     this.currentTab = 'claude-code';
     this.servers = [];
+    this.configStates = {
+      individual: {}, // Track individual server config visibility
+      group: { global: false, project: false } // Track group toggle states
+    };
     this.init();
   }
 
@@ -57,6 +61,8 @@ class MCPManager {
 
   renderAll() {
     this.renderServers();
+    // Sync group toggle states after rendering
+    this.syncAllGroupToggleStates();
   }
 
   async getConfigInfo() {
@@ -135,13 +141,26 @@ class MCPManager {
     let html = '';
 
     if (globalServers.length > 0) {
-      html += '<div class="server-group-title">Global</div>';
+      html += `
+        <div class="server-group-header">
+          <div class="server-group-title">Global</div>
+          <button class="group-toggle-btn" onclick="mcpManager.toggleGroupConfig('global')" title="Toggle all Global configuration blocks">
+            <span class="toggle-icon">−</span> Group Toggle
+          </button>
+        </div>
+      `;
       html += this.renderGlobalStatsCard(globalServers, configInfo);
-      html += globalServers.map(server => `
+      html += globalServers.map(server => {
+        const configId = `global-${server.name}`;
+        const isExpanded = this.configStates.individual[configId] !== false; // Default to expanded
+        return `
         <div class="server-card ${server.enabled ? 'enabled' : 'disabled'} ${server.scope}">
           <div class="server-header">
             <div class="server-info">
               <div class="server-name-row">
+                <button class="config-toggle-btn" onclick="mcpManager.toggleServerConfig('${configId}')" title="Toggle configuration">
+                  <span class="chevron ${isExpanded ? 'expanded' : ''}">▼</span>
+                </button>
                 <h3 class="server-name">${server.name}</h3>
                 <span class="server-scope ${server.scope} ${!server.enabled ? 'disabled' : ''}" 
                     ${server.enabled ? `onclick="mcpManager.showProjectDropdown(event, '${server.name}', '${server.scope}', ${server.projectPath ? `'${server.projectPath}'` : 'null'})"` : ''}>${server.scope === 'global' ? 'global' : `project: ${server.projectPath}`}</span>
@@ -155,27 +174,40 @@ class MCPManager {
               </label>
             </div>
           </div>
-          <div class="server-details">
+          <div class="server-details ${isExpanded ? 'expanded' : 'collapsed'}" data-config-id="${configId}">
             <div class="server-config">
               <strong>Configuration:</strong>
               <pre class="config-json">${JSON.stringify(server.config, null, 2)}</pre>
             </div>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
 
     if (projectServers.length > 0) {
       if (globalServers.length > 0) {
         html += '<div class="server-separator"></div>';
       }
-      html += '<div class="server-group-title">Project</div>';
+      html += `
+        <div class="server-group-header">
+          <div class="server-group-title">Project</div>
+          <button class="group-toggle-btn" onclick="mcpManager.toggleGroupConfig('project')" title="Toggle all Project configuration blocks">
+            <span class="toggle-icon">−</span> Group Toggle
+          </button>
+        </div>
+      `;
       html += this.renderProjectStatsCard(projectServers);
-      html += projectServers.map(server => `
+      html += projectServers.map(server => {
+        const configId = `project-${server.name}-${server.projectPath ? server.projectPath.replace(/[^a-zA-Z0-9]/g, '_') : 'default'}`;
+        const isExpanded = this.configStates.individual[configId] !== false; // Default to expanded
+        return `
         <div class="server-card ${server.enabled ? 'enabled' : 'disabled'} ${server.scope}">
           <div class="server-header">
             <div class="server-info">
               <div class="server-name-row">
+                <button class="config-toggle-btn" onclick="mcpManager.toggleServerConfig('${configId}')" title="Toggle configuration">
+                  <span class="chevron ${isExpanded ? 'expanded' : ''}">▼</span>
+                </button>
                 <h3 class="server-name">${server.name}</h3>
                 <span class="server-scope ${server.scope} ${!server.enabled ? 'disabled' : ''}" 
                     ${server.enabled ? `onclick="mcpManager.showProjectDropdown(event, '${server.name}', '${server.scope}', ${server.projectPath ? `'${server.projectPath}'` : 'null'})"` : ''}>${server.scope === 'global' ? 'global' : `project: ${server.projectPath}`}</span>
@@ -189,17 +221,20 @@ class MCPManager {
               </label>
             </div>
           </div>
-          <div class="server-details">
+          <div class="server-details ${isExpanded ? 'expanded' : 'collapsed'}" data-config-id="${configId}">
             <div class="server-config">
               <strong>Configuration:</strong>
               <pre class="config-json">${JSON.stringify(server.config, null, 2)}</pre>
             </div>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
 
     container.innerHTML = html;
+    
+    // Initialize individual states for any new configs (default expanded)
+    this.initializeConfigStates(currentServers);
   }
 
   async toggleServer(name, appType, projectPath, enable) {
@@ -523,6 +558,123 @@ class MCPManager {
     } catch (error) {
       this.showError(`Error copying server: ${error.message}`);
     }
+  }
+
+  // Sync group toggle button state with actual individual config states
+  syncGroupToggleState(groupType) {
+    const prefix = `${groupType}-`;
+    const configIds = Object.keys(this.configStates.individual).filter(id => id.startsWith(prefix));
+    
+    if (configIds.length === 0) return;
+    
+    // Check current state of all configs in this group
+    const expandedCount = configIds.filter(id => this.configStates.individual[id] === true).length;
+    const allExpanded = expandedCount === configIds.length;
+    const allCollapsed = expandedCount === 0;
+    
+    // Update group state based on majority or mixed state logic
+    // If all expanded -> show "Collapse All" (true state)
+    // If all collapsed -> show "Expand All" (false state)
+    // If mixed -> show "Collapse All" (true state) since there are still some to collapse
+    let newGroupState;
+    if (allCollapsed) {
+      newGroupState = false; // Show "Expand All"
+    } else {
+      newGroupState = true; // Show "Collapse All" (either all expanded or mixed)
+    }
+    
+    // Update group state
+    this.configStates.group[groupType] = newGroupState;
+    
+    // Update the group toggle button UI
+    const groupButton = document.querySelector(`button[onclick*="toggleGroupConfig('${groupType}')"]`);
+    if (groupButton) {
+      const toggleIcon = groupButton.querySelector('.toggle-icon');
+      if (toggleIcon) {
+        toggleIcon.textContent = newGroupState ? '−' : '+';
+      }
+    }
+  }
+
+  // Toggle individual server configuration visibility
+  toggleServerConfig(configId) {
+    // Initialize if not set (default to expanded)
+    if (this.configStates.individual[configId] === undefined) {
+      this.configStates.individual[configId] = true;
+    }
+    
+    // Update state
+    this.configStates.individual[configId] = !this.configStates.individual[configId];
+    
+    // Find the server details element
+    const serverDetails = document.querySelector(`[data-config-id="${configId}"]`);
+    const chevron = document.querySelector(`button[onclick*="${configId}"] .chevron`);
+    
+    if (serverDetails && chevron) {
+      const isExpanded = this.configStates.individual[configId];
+      
+      // Update classes
+      serverDetails.classList.toggle('expanded', isExpanded);
+      serverDetails.classList.toggle('collapsed', !isExpanded);
+      chevron.classList.toggle('expanded', isExpanded);
+    }
+    
+    // Sync the group toggle state after individual change
+    const groupType = configId.startsWith('global-') ? 'global' : 'project';
+    this.syncGroupToggleState(groupType);
+  }
+
+  // Initialize config states for servers (ensures all start as expanded)
+  initializeConfigStates(servers) {
+    servers.forEach(server => {
+      const configId = server.scope === 'global' 
+        ? `global-${server.name}` 
+        : `project-${server.name}-${server.projectPath ? server.projectPath.replace(/[^a-zA-Z0-9]/g, '_') : 'default'}`;
+      
+      // Initialize to expanded if not already set
+      if (this.configStates.individual[configId] === undefined) {
+        this.configStates.individual[configId] = true;
+      }
+    });
+  }
+  
+  // Sync all group toggle states
+  syncAllGroupToggleStates() {
+    this.syncGroupToggleState('global');
+    this.syncGroupToggleState('project');
+  }
+
+  // Toggle all configurations in a group (global or project)
+  toggleGroupConfig(groupType) {
+    const currentState = this.configStates.group[groupType];
+    const newState = !currentState;
+    
+    // Find all server details elements currently in the DOM that belong to this group
+    const prefix = `${groupType}-`;
+    const serverDetailsElements = document.querySelectorAll(`[data-config-id^="${prefix}"]`);
+    
+    // Update all individual states and DOM elements in this group
+    serverDetailsElements.forEach(serverDetails => {
+      const configId = serverDetails.getAttribute('data-config-id');
+      
+      // Update individual state
+      this.configStates.individual[configId] = newState;
+      
+      // Find corresponding chevron
+      const chevron = document.querySelector(`button[onclick*="${configId}"] .chevron`);
+      
+      // Update DOM elements
+      serverDetails.classList.toggle('expanded', newState);
+      serverDetails.classList.toggle('collapsed', !newState);
+      
+      if (chevron) {
+        chevron.classList.toggle('expanded', newState);
+      }
+    });
+    
+    // Update group state and button after the operation
+    this.configStates.group[groupType] = newState;
+    this.syncGroupToggleState(groupType);
   }
 }
 
