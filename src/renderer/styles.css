@@ -205,6 +205,38 @@ body {
     gap: 1rem;
 }
 
+/* Server Group Header */
+.server-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.group-toggle-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.group-toggle-btn:hover {
+    background: #2980b9;
+}
+
+.toggle-icon {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
 .server-separator {
     height: 2rem;
 }
@@ -281,6 +313,38 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+}
+
+/* Config Toggle Button */
+.config-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-right: 0.75rem;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.config-toggle-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.chevron {
+    font-size: 0.75rem;
+    color: #666;
+    transition: transform 0.2s ease-in-out;
+    display: inline-block;
+}
+
+.chevron.expanded {
+    transform: rotate(180deg);
 }
 
 .server-name {
@@ -508,6 +572,20 @@ input:checked + .toggle-slider:before {
     padding: 1.5rem;
     border-top: 1px solid #ecf0f1;
     background: #f8f9fa;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.server-details.expanded {
+    max-height: 500px;
+    opacity: 1;
+}
+
+.server-details.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 1.5rem;
+    border-top: none;
 }
 
 .server-project {

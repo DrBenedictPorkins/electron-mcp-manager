@@ -4,7 +4,7 @@ class MCPManager {
     this.servers = [];
     this.configStates = {
       individual: {}, // Track individual server config visibility
-      group: { global: false, project: false } // Track group toggle states
+      group: { global: true, project: true } // Track group toggle states - start as expanded to match individual defaults
     };
     this.init();
   }
@@ -235,6 +235,9 @@ class MCPManager {
     
     // Initialize individual states for any new configs (default expanded)
     this.initializeConfigStates(currentServers);
+    
+    // Ensure group toggle states are synced immediately after DOM is updated
+    this.syncAllGroupToggleStates();
   }
 
   async toggleServer(name, appType, projectPath, enable) {
